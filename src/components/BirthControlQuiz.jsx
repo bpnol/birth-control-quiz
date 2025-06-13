@@ -3,16 +3,18 @@ import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 
 const questions = [
-  { id: "longTerm", text: "Do you want long-term birth control (3+ years)?" },
-  { id: "noEstrogen", text: "Do you want a method without estrogen?" },
-  { id: "noHormones", text: "Do you want a hormone-free method?" },
-  { id: "okWithProcedure", text: "Are you okay with a minor in-office procedure?" },
-  { id: "breastfeeding", text: "Are you currently breastfeeding?" },
-  { id: "emergency", text: "Do you need emergency contraception?" },
-  { id: "moodConcerns", text: "Have you experienced mood issues with hormonal birth control?" },
+  { id: "lowMaintenance", text: "I want something low-maintenance" },
+  { id: "noDaily", text: "I don’t want to take something daily" },
+  { id: "noEstrogen", text: "I prefer no estrogen" },
+  { id: "breastfeeding", text: "I’m breastfeeding" },
+  { id: "wantPregnant", text: "I want to get pregnant in the next year" },
+  { id: "moodChanges", text: "I have a history of mood changes with hormones" },
+  { id: "over190lbs", text: "I weigh over 190 lbs" },
+  { id: "selfInsertion", text: "I’m okay with self-insertion" },
+  { id: "emergency", text: "I need something ASAP (emergency)" },
 ];
 
-// Full method details table (keys must match naming used in recs)
+// Methods info (same as before)
 const methodsInfo = {
   "Combined Oral Contraceptives (COCs)": {
     prescription: "Yes",
@@ -71,18 +73,55 @@ const methodsInfo = {
 const femaleResultsMap = (answers) => {
   const recs = [];
 
-  if (answers.noHormones) {
-    if (answers.longTerm && answers.okWithProcedure) recs.push("Copper IUD (e.g., Paragard)");
-    // No External Condoms for females
-  } else {
-    if (answers.longTerm && answers.okWithProcedure) recs.push("Hormonal IUD (e.g., Mirena)");
-    if (!answers.longTerm && answers.noEstrogen) recs.push("Progestin-Only Pills (POPs)", "Injectable (e.g., Depo-Provera)");
-    if (!answers.longTerm && !answers.noEstrogen) recs.push("Combined Oral Contraceptives (COCs)", "Contraceptive Patch", "Vaginal Ring (e.g., NuvaRing)");
+  if (answers.emergency) {
+    recs.push("Emergency Contraceptive Pill", "Copper IUD (e.g., Paragard)");
   }
 
-  if (answers.breastfeeding && !answers.noHormones) recs.push("Progestin-Only Pills (POPs)", "Hormonal IUD (e.g., Mirena)", "Injectable (e.g., Depo-Provera)");
-  if (answers.emergency) recs.push("Emergency Contraceptive Pill", "Copper IUD (e.g., Paragard)");
-  if (answers.moodConcerns) recs.push("Copper IUD (e.g., Paragard)", "Progestin-Only Pills (POPs)");
+  if (answers.wantPregnant) {
+    // For those wanting pregnancy soon, suggest only methods that can be stopped easily or no method
+    recs.push("External Condoms");
+    // Copper IUD can be removed any time, so okay
+    recs.push("Copper IUD (e.g., Paragard)");
+    return [...new Set(recs)];
+  }
+
+  if (answers.noEstrogen) {
+    if (answers.noDaily) {
+      // Long-acting no-estrogen options
+      recs.push("Copper IUD (e.g., Paragard)", "Hormonal IUD (e.g., Mirena)", "Injectable (e.g., Depo-Provera)");
+    } else {
+      // Daily no-estrogen option
+      recs.push("Progestin-Only Pills (POPs)");
+    }
+  } else {
+    if (answers.noDaily) {
+      // Long-acting estrogen-containing or patch/ring
+      recs.push("Hormonal IUD (e.g., Mirena)", "Injectable (e.g., Depo-Provera)", "Contraceptive Patch", "Vaginal Ring (e.g., NuvaRing)");
+    } else {
+      // Daily estrogen-containing pills
+      recs.push("Combined Oral Contraceptives (COCs)");
+    }
+  }
+
+  if (answers.breastfeeding) {
+    recs.push("Progestin-Only Pills (POPs)", "Hormonal IUD (e.g., Mirena)", "Injectable (e.g., Depo-Provera)");
+  }
+
+  if (answers.moodChanges) {
+    recs.push("Copper IUD (e.g., Paragard)", "Progestin-Only Pills (POPs)");
+  }
+
+  if (answers.over190lbs) {
+    // Patch and ring might be less effective at higher weight
+    recs.push("Combined Oral Contraceptives (COCs)", "Progestin-Only Pills (POPs)", "Hormonal IUD (e.g., Mirena)", "Copper IUD (e.g., Paragard)", "Injectable (e.g., Depo-Provera)");
+  }
+
+  if (answers.selfInsertion) {
+    recs.push("Vaginal Ring (e.g., NuvaRing)");
+  }
+
+  // Always add external condoms for barrier method option
+  recs.push("External Condoms");
 
   return [...new Set(recs)];
 };
@@ -125,18 +164,11 @@ export default function BirthControlQuiz() {
     setFinished(false);
   };
 
-  // For females: suggested vs other options
   const femaleSuggested = finished && answers.sex === "Female" ? femaleResultsMap(answers) : [];
-  const allFemaleMethods = [
-    "Combined Oral Contraceptives (COCs)",
-    "Progestin-Only Pills (POPs)",
-    "Contraceptive Patch",
-    "Vaginal Ring (e.g., NuvaRing)",
-    "Injectable (e.g., Depo-Provera)",
-    "Emergency Contraceptive Pill",
-    "Hormonal IUD (e.g., Mirena)",
-    "Copper IUD (e.g., Paragard)",
-  ];
+  const allFemaleMethods = Object.keys(methodsInfo).filter(
+    (m) =>
+      !["External Condoms", "Vasectomy"].includes(m) // exclude male-only methods
+  );
   const femaleOthers = allFemaleMethods.filter((m) => !femaleSuggested.includes(m));
 
   return (
