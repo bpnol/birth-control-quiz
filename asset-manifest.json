@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/birth-control-quiz/static/css/main.e6c13ad2.css",
-    "main.js": "/birth-control-quiz/static/js/main.2213694a.js",
+    "main.js": "/birth-control-quiz/static/js/main.596a0a15.js",
     "static/js/453.10bc859d.chunk.js": "/birth-control-quiz/static/js/453.10bc859d.chunk.js",
     "index.html": "/birth-control-quiz/index.html",
     "main.e6c13ad2.css.map": "/birth-control-quiz/static/css/main.e6c13ad2.css.map",
-    "main.2213694a.js.map": "/birth-control-quiz/static/js/main.2213694a.js.map",
+    "main.596a0a15.js.map": "/birth-control-quiz/static/js/main.596a0a15.js.map",
     "453.10bc859d.chunk.js.map": "/birth-control-quiz/static/js/453.10bc859d.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.e6c13ad2.css",
-    "static/js/main.2213694a.js"
+    "static/js/main.596a0a15.js"
   ]
 }
